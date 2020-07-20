@@ -1,0 +1,75 @@
+using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace transaccion1
+{
+    public partial class Form1 : Form
+    {
+        NpgsqlConnection conexion = new NpgsqlConnection("Server = localhost; User Id = postgres; Password = 1234; Database =Transaccion.;");
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            TranssaccionExitosa(textBox1.Text, textBox2.Text, textBox3.Text); 
+        }
+        public void TranssaccionExitosa(string CuentaaAcreditar, string CuentaaDebitar, string Saldo) 
+        {
+            conexion.Open();
+            string query = "BEGIN";
+        string query1 = $"UPDATE cuentas SET saldo = saldo - { Saldo } WHERE nro_cuenta = '{ CuentaaDebitar }'  and saldo >= { Saldo }";
+        string query2 = $"UPDATE cuentas SET saldo = saldo + { Saldo } WHERE nro_cuenta = '{ CuentaaAcreditar }'";
+        string query3 = "COMMIT";
+        NpgsqlCommand realizar = new NpgsqlCommand(query, conexion);
+            NpgsqlCommand realizar1 = new NpgsqlCommand(query1,conexion);
+            NpgsqlCommand realizar2 = new NpgsqlCommand(query2, conexion);
+            NpgsqlCommand realizar3 = new NpgsqlCommand(query3, conexion);
+            realizar.ExecuteNonQuery();
+            realizar1.ExecuteNonQuery();
+            realizar2.ExecuteNonQuery();
+            realizar3.ExecuteNonQuery();
+            conexion.Close();
+            MessageBox.Show("Transsaccion Exitosa");
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+           
+
+         TransaccionConError(textBox1.Text, textBox2.Text, textBox3.Text);
+        }
+        public void TransaccionConError(string CuentaaAcreditar, string CuentaaDebitar, string Saldo) 
+            {
+         conexion.Open();
+            string query = "BEGIN";
+            string query1 = $"UPDATE cuentas SET saldo = saldo - { Saldo } WHERE nro_cuenta = '{ CuentaaDebitar }'  and saldo >= { Saldo }";
+            string query2 = $"UPDATE cuentas SET saldo = saldo + { Saldo } WHERE nro_cuenta = '{ CuentaaAcreditar }'";
+            string query3 = "RollBack";
+    NpgsqlCommand realizar = new NpgsqlCommand(query, conexion);
+        NpgsqlCommand realizar1 = new NpgsqlCommand(query1, conexion);
+        NpgsqlCommand realizar2 = new NpgsqlCommand(query2, conexion);
+        NpgsqlCommand realizar3 = new NpgsqlCommand(query3, conexion);
+        realizar.ExecuteNonQuery();
+        realizar1.ExecuteNonQuery();
+        realizar2.ExecuteNonQuery();
+        realizar3.ExecuteNonQuery();
+        conexion.Close();
+        MessageBox.Show("Trasaccion Con Error");
+        }
+    }
+}
